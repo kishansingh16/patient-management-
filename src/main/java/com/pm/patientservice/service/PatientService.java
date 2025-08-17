@@ -1,5 +1,6 @@
 package com.pm.patientservice.service;
 
+import com.pm.patientservice.dto.PatientRequestDTO;
 import com.pm.patientservice.dto.PatientResponseDTO;
 import com.pm.patientservice.mapper.PatientMapper;
 import com.pm.patientservice.model.Patient;
@@ -7,7 +8,6 @@ import com.pm.patientservice.repository.PatientRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PatientService {
@@ -18,19 +18,19 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
+    // Fetch all patients
     public List<PatientResponseDTO> getPatients() {
         List<Patient> patients = patientRepository.findAll();
+        return patients.stream()
+                .map(PatientMapper::toDTO)
+                .toList();
+    }
 
-        List<PatientResponseDTO> patientResponseDTOs=patients.stream()
-                .map(PatientMapper::toDTO).toList();// method reference, cleaner
-              //.map(patient->PatientMapper.toDTO(patient)).toList();
+    // Create a new patient
+    public PatientResponseDTO createPatient(PatientRequestDTO patientRequestDTO) {
+        Patient newPatient = patientRepository.save(PatientMapper.toEntity(patientRequestDTO));
 
-        return patientResponseDTOs;
 
-        //OR
-        //return patients.stream()
-        //                .map(PatientMapper::toDTO) // method reference, cleaner
-        //                .collect(Collectors.toList()); // use toList() if Java 16+
-
+        return PatientMapper.toDTO(newPatient);
     }
 }
